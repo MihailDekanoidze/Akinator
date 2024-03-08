@@ -1,0 +1,6 @@
+#ifndef MY_FUNCTOINS_H
+#define MY_FUNCTOINS_H
+
+int mystrcmp(const void * str1, const void * str2);
+
+#endif // MY_FUNCTOINS_H

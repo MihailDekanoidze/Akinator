@@ -1,0 +1,25 @@
+;�a;�a
+int bin = 0b00001111001110111111101001100001;
+    int rbin = __INT64_MAX__ - bin;
+    int rubin = __UINT64_MAX__ - bin;
+
+    printf("bin = %d\n", bin);
+    printf("rbin = %d\n", rbin);
+    printf("rubin = %u\n", rubin);
+
+    char word[] = {(char)0b00001111, (char)0b00111011, (char)0b11111010, (char)0b01100001};  
+    unsigned char uword[] = {(unsigned char)0b00001111, (unsigned char)0b00111011, (unsigned char)0b11111010, (unsigned char)0b01100001};  
+
+    for (size_t i = 0; i < 4; i++)
+    {
+        printf("word[%zu] = %c\n", i, word[i]);
+    }
+    for (size_t i = 0; i < 4; i++)
+    {
+        printf("uword[%zu] = %c\n", i,  uword[i]);
+    }
+
+    FILE* yota_code = fopen("YOTA_CODE.txt", "wb");
+
+    fwrite(word, sizeof(char), 4, yota_code);
+    fwrite(uword, sizeof(char), 4, yota_code);
