@@ -22,7 +22,7 @@ undefined,unreachable,vla-bound,vptr
 all: Akinator
 
 Akinator:  MyStrcmp.o Akinator.o main.o  
-		g++ ./Apps/MyStrcmp.o ./Apps/Akinator.o ./Apps/main.o -o Akinator 
+		g++ ./Apps/MyStrcmp.o ./Apps/Akinator.o ./Apps/main.o -o Akinator.exe 
 
 MyStrcmp.o:
 		g++ ./source/mystrcmp.cpp -c -o ./Apps/MyStrcmp.o

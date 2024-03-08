@@ -1,0 +1,4 @@
+*.o
+*.exe
+test.cpp
+test
