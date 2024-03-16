@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
 #include "Akinator.h"
-#include "./includes/others.h"
+#include "./include/others.h"
 
 Tree* tree_create(size_t node_count)
 {
@@ -21,12 +20,9 @@ Tree* tree_create(size_t node_count)
     tree->root = root;
 
     tree->capacity = node_count;
-    memcpy(tree->root, START_NODE, BASE_NODE_COUNT);
     tree->root->left = NULL;
     tree->root->right = NULL;
     tree->root->previous = NULL;
-
-    tree->node_count++;
 
     FILE* tree_log = fopen("tree_log.cpp", "a+");
     
@@ -40,10 +36,10 @@ Tree* tree_create(size_t node_count)
 
 
 
-Node* object_search(Tree* main_tree)
+Node* object_search(Tree* akinator_tree)                    
 {
-    Node* curr_node = main_tree->root;
-    tree_print(main_tree->root, main_tree->tree_log);
+    Node* curr_node = akinator_tree->root;
+    tree_print(akinator_tree->root, akinator_tree->tree_log);
 
     while (curr_node->left != NULL)
     {
@@ -66,7 +62,7 @@ Node* object_search(Tree* main_tree)
 
 size_t question(Node* curr_node)
 {
-    printf("Это существо ");
+    printf("��� �������� ");
 
     size_t i = 0;
     while (curr_node->val[i])
@@ -74,66 +70,46 @@ size_t question(Node* curr_node)
         printf("%c", curr_node->val[i++]);
     }
 
-    printf(" ?\nДа / Нет\n");
+    printf(" ?\n�� / ���\n");
 
     char answer[50] = {};
     scanf("%s", answer);
 
-    return mystrcmp(answer, "Нет");
+    return strncmp(answer, "���", sizeof(STR_LEN));
 }
 
-void object_processing(Node* curr_node, Tree* main_tree)
+void object_processing(Node* curr_node, Tree* akinator_tree)
 {
     size_t answer = question(curr_node);
 
     if (answer)
     {
-        printf("Я это знал!\n");
+        printf("� ��� ����!\n");
+        return; 
     }
-    else
+
+    printf("�� ����������� ����!\n");
+    printf("����� ��� �� ��� ?\n");
+
+    unsigned char* new_object = str_scanf();
+
+    printf("��� %s ���������� �� %s?\n", new_object, curr_node->val);
+
+    unsigned char* feature = str_scanf();
+    printf("negative_feature(feature) = %d\n", negative_feature(feature));
+
+    while (negative_feature(feature))
     {
-        printf("Вы перехитрили меня!\n");
-        printf("Тогда кто же это ?\n");
-        printf("\r");
-
-        unsigned char* new_object = 0;
-        new_object = str_scanf();
-
-        printf("new_obj = ");
-        str_print(new_object);
-        printf("\n");
-
-        printf("Чем ");
-        str_print(new_object);
-        printf(" отличается от ");
-        str_print(curr_node->val);
-        printf("?\n");
-    
-        unsigned char* feature = str_scanf();
-
-        printf("feature is ");
-        str_print(feature);
-        printf("\n");
-
-        object_add(curr_node, (const char*)new_object, (const char*)feature, main_tree);
-
-        free(new_object);
-        free(feature);
-        printf("Я запомнил это...\n");
+        printf("��������� ���� ������� � ������������� �����\n");
+        feature = str_scanf();
     }
+
+    object_add(curr_node, (const char*)new_object, (const char*)feature, akinator_tree);
+
+    free(new_object);
+    free(feature);
+    printf("� �������� ���...\n");
 }
-
-
-void str_print(unsigned char* source)
-{
-    size_t i = 0;
-    while (source[i])
-    {
-        printf("%c", source[i++]);
-    }
-}
-
-
 
 unsigned char* str_scanf(void)
 {
@@ -147,7 +123,6 @@ unsigned char* str_scanf(void)
     {
         if (i == max_len - 1)
         {    
-            printf("max len\n");
             new_object = (unsigned char*)realloc(new_object, max_len * 2);
             max_len *= 2;
         }
@@ -157,58 +132,41 @@ unsigned char* str_scanf(void)
             first = '\n';
         }
         new_object[i++] = (unsigned char)getchar();
-        //printf("%c(%d)\n", new_object[i - 1], new_object[i - 1]);
     }
     while (new_object[i - 1] != '\n');
 
     new_object[i - 1] = '\0';
 
-    i = 0;
-    unsigned char* source = new_object;
-    while (source[i])
-    {
-        printf("%c", source[i++]);
-    }
-
-    printf("\n");
-    for (i = 0; i < STR_LEN; i++)
-    {
-        printf("source[%zu] = %c(%d)\n", i, source[i], source[i]);
-    }
-
-    str_print(new_object);
-
     return new_object;
 }
 
-void object_add(Node* old_node, const char* new_object, const char* feature, Tree* main_tree)
-{
-    printf("old_node = ");
-    str_print(old_node->val);
-    printf("\n");
 
-    /*if (main_tree->node_count == main_tree->capacity)
-        tree_increase_capasity(main_tree);*/
+void object_add(Node* old_node, const char* new_object, const char* feature, Tree* akinator_tree)
+{           // akinator without tree
+    printf("old_node = %s\n", old_node->val);
 
-    Node* new_node = &(main_tree->root)[main_tree->node_count++];
+    /*if (akinator_tree->node_count == akinator_tree->capacity)
+        tree_increase_capasity(akinator_tree);*/
+
+    Node* new_node = &(akinator_tree->root)[akinator_tree->node_count++];
 
     new_node->left  = NULL;
     new_node->right = NULL;
     new_node->previous = old_node;
     memcpy(new_node->val, new_object, STR_LEN);
 
-    /*if (main_tree->node_count == main_tree->capacity)
-        tree_increase_capasity(main_tree);*/
+    /*if (akinator_tree->node_count == akinator_tree->capacity)
+        tree_increase_capasity(akinator_tree);*/
 
-    Node* old_object = &(main_tree->root)[main_tree->node_count++];
+    Node* old_object = &(akinator_tree->root)[akinator_tree->node_count++];
 
     old_object->left  = NULL;
     old_object->right = NULL;
     old_object->previous = old_node;
     memcpy(old_object->val, old_node->val, STR_LEN);
 
-    //printf("tree capacity = %zu\n", main_tree->capacity);
-    //printf("tree_node_count = %zu\n", main_tree->node_count);
+    //printf("tree capacity = %zu\n", akinator_tree->capacity);
+    //printf("tree_node_count = %zu\n", akinator_tree->node_count);
 
     Node* feature_node = old_node;
 
@@ -217,38 +175,37 @@ void object_add(Node* old_node, const char* new_object, const char* feature, Tre
     memcpy(old_node->val, feature, STR_LEN);
 
     printf("old_node = %s\n", old_node->val);
-    str_print(old_node->val);
 
-    str_print(feature_node->left->val);
-    printf(" отличается от ");
-    str_print(feature_node->right->val); 
-    printf(" тем, что ");
-    str_print(feature_node->val);
+    printf("feature_node->left->val = %s\n", feature_node->left->val);
+    printf(" ���������� �� ");
+    printf("feature_node->right->val =%s\n", feature_node->right->val); 
+    printf(" ���, ��� ");
+    printf("feature_node->val = %s\n", feature_node->val);
     printf("\n");
 
-    node_list_print(main_tree);
+    node_list_print(akinator_tree);
 
     return;
 }
 
-int is_continue(Tree* main_tree)
+int is_continue(Tree* akinator_tree)
 {
-    tree_print(main_tree->root, main_tree->tree_log);
-    node_list_print(main_tree);
+    tree_print(akinator_tree->root, akinator_tree->tree_log);
+    node_list_print(akinator_tree);
 
-    printf("Желаете продолжить ? (Да / Нет)\n");
+    printf("������� ���������� ? (�� / ���)\n");
 
     char* answer = (char*) calloc(STR_LEN, sizeof(char));
     scanf("%s", answer);
 
-    tree_print(main_tree->root, main_tree->tree_log);
-    node_list_print(main_tree);
+    tree_print(akinator_tree->root, akinator_tree->tree_log);
+    node_list_print(akinator_tree);
 
-    if (mystrcmp(answer, "Да"))
+    if (strncmp(answer, "��", STR_LEN))
     {   
         free(answer);
-        tree_detor(main_tree);
-        printf("Буду ждать вас снова здесь\n");
+        tree_detor(akinator_tree);
+        printf("���� ����� ��� ����� �����\n");
         return 0;
     }
     free(answer);
@@ -257,14 +214,14 @@ int is_continue(Tree* main_tree)
 }
 
 
-void akinator_playing(Tree* main_tree)
+void akinator_playing(Tree* akinator_tree)
 {
     int continue_flag = 1;
     while (continue_flag)
     {
-        Node* found_object = object_search(main_tree);
-        object_processing(found_object, main_tree);
-        continue_flag = is_continue(main_tree);
+        Node* found_object = object_search(akinator_tree);
+        object_processing(found_object, akinator_tree);
+        continue_flag = is_continue(akinator_tree);
     }
 }
 
@@ -308,10 +265,135 @@ void tree_print(Node* tree, FILE* tree_log)
     }
 }
 
-void node_list_print(Tree* main_tree)
+void node_list_print(Tree* tree)
 {
-    for (size_t i = 0; i < main_tree->node_count; i++)
+    for (size_t i = 0; i < tree->node_count; i++)
     {
-        printf("\nnode[%zu] = %s\n", i, (main_tree->root + i)->val);
+        printf("\nnode[%zu] = %s\n", i, (tree->root + i)->val);
     }
+}
+
+int negative_feature(unsigned char* feature)
+{
+    unsigned char ru_not[] = "��";
+    unsigned char ru_Not[] = "��";
+    unsigned char cmp_symbols[] = {feature[0], feature[1], feature[2], feature[3], '\0'};
+
+    //printf("cmp_symbols = %s\n", cmp_symbols);
+
+    return !((strncmp((char*)ru_not, (char*)feature, sizeof(ru_not))) 
+           || strncmp((char*)ru_Not, (char*)feature, sizeof(ru_not)));
+}
+
+
+Node* akinator_tree_read(char* source, Tree* akinator_tree, size_t* pos)
+{
+    if (*(source + *(pos)) == '{')
+    {
+        /*printf("current symbol is %c\n", *source);
+        printf("Increase pos\n");
+        char pause = getchar();
+        ClearBuffer();*/
+
+        (*pos)++;
+
+        //printf("current symbol is %c\n", *(source + *pos));
+
+        if (source[*pos] == '}') 
+        {
+            //printf("processed symbol is }\n");
+            (*pos)++;
+            return NULL;
+        }
+
+        //printf("\ncreating a new_node\n");
+
+        unsigned char* arg = arg_scanf(source, pos);
+        //printf("arg is %s\n", arg);  
+
+        Node* new_node = akinator_tree->root + (akinator_tree->node_count++);
+
+        memcpy(new_node->val, (char*)arg, sizeof(char) * STR_LEN);
+        free(arg);
+
+        //printf("source = %s\n", source + *(pos));
+
+        new_node->left  = akinator_tree_read(source, akinator_tree, pos);
+        (*pos)++;
+
+        /*printf("the left node for %s is %s\n\n", new_node->val, new_node->left->val);
+
+        printf("source after left = %s\n", source + *(pos));
+        printf("the next symbol after left is %c\n", *(source +*pos));*/
+
+        new_node->right = akinator_tree_read(source, akinator_tree, pos);
+        
+        /*printf("the right node for %s is %s\n\n", new_node->val, new_node->right->val);
+        
+        printf("source after right = %s\n", source + *(pos));
+        printf("the next symbol after right is %c\n\n", *(source +*pos));*/
+
+        return new_node;
+    }
+    else
+    {
+        /*printf("\nthe symbol different from '{' is '%c'\n", *(source + *pos));
+        printf("Increase pos from %zu to %zu\n", *pos, *(pos) + 1);
+
+        char pause = getchar();
+        ClearBuffer();*/
+
+        (*pos)++;
+
+        /*printf("pos = %zu\nbuffer[%zu] = %c(%d)\n", *pos, *pos, *(source + (*pos)));
+
+        printf("current symbol is %c(%d)\n", *(source + (*pos)), *(source + (*pos)));*/
+    }
+
+    return nullptr;
+}
+
+// regular expression 
+
+unsigned char* arg_scanf(char* source, size_t* pos)
+{
+    unsigned char* arg = (unsigned char*)calloc(STR_LEN, rus_char_size);
+
+    size_t i = 0;
+
+    skip_spaces(source, pos);
+    /*printf("source = %s\n", source + *pos);
+
+    printf("symbol = %c\n", (unsigned char) (*(source + *pos)));*/
+
+    if (*(source + (*pos)) == 34)
+    {
+        (*pos)++;
+        while (*(source + *(pos)) != '"')
+        {
+            arg[i] = *(source + *pos);
+            i++; (*pos)++;
+        }
+        (*pos)++;
+
+        //printf("in arg source = %s\n", source + *(pos));
+        return arg;
+    }
+
+    free(arg);
+    return nullptr;
+}
+
+void skip_spaces(char* source, size_t* pos)
+{
+    size_t i = 0;
+    while (*(source + *pos) == ' ');
+    return;
+}
+
+void ClearBuffer(void)
+{
+    char ch = 0;
+
+    while ((ch = getchar()) != '\n' && ch != EOF) {}
 }

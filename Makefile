@@ -21,11 +21,11 @@ undefined,unreachable,vla-bound,vptr
 
 all: Akinator
 
-Akinator:  MyStrcmp.o Akinator.o main.o  
-		g++ ./Apps/MyStrcmp.o ./Apps/Akinator.o ./Apps/main.o -o Akinator.exe 
+Akinator:  InputText.o Akinator.o main.o  
+		g++ ./Apps/InputText.o ./Apps/Akinator.o ./Apps/main.o -o Akinator.exe 
 
-MyStrcmp.o:
-		g++ ./source/mystrcmp.cpp -c -o ./Apps/MyStrcmp.o
+InputText.o:
+		g++ ./source/InputText.cpp -c -o ./Apps/InputText.o
 
 Akinator.o:
 		g++ Akinator.cpp -c -o ./Apps/Akinator.o
@@ -37,4 +37,4 @@ clean:
 		./Apps rm -rf *.o
 
 run:
-		./Akinator
+		./Akinator.exe

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Akinator.h"
+#include "./include/InputText.h"
 
 
 #define START_NODE  "неизвестно кто"  
@@ -28,79 +29,83 @@ int main()
     Node* start_node = (Node*)calloc(1, sizeof(Node));
     start_node->left = NULL;
     start_node->right = NULL;
-    memcpy(start_node->val, START_NODE, BASE_NODE_COUNT);
 
-    print_nodes(start_node);
+    FILE* data =  fopen("tree.txt", "rb");
 
-    print_nodes(start_node);
+    TextInfo* buffer = (TextInfo*) calloc(1, sizeof(TextInfo));
+    InputText(buffer, data); 
 
-    unsigned char* string = (unsigned char*)calloc(STR_LEN, sizeof(unsigned char));
+    fclose(data);
 
-    str_print(string);
-    printf("\n");
+    Tree* akinator_tree = tree_create(BASE_NODE_COUNT);
 
-    string = str_scanf();
+    akinator_tree_read((char*)(buffer->buffer), akinator_tree);
 
-    str_print(string);
-    printf("\n");
+    tree_print(akinator_tree->root, fopen("tree_log.cpp", "w"));
+
+    for (size_t i = 0; i < akinator_tree->node_count; i++)
+    {
+        printf("Node[%zu] = %s\n", i, (akinator_tree->root + i)->val);
+    }
+
+    tree_detor(akinator_tree);
 
     return 0;
 }
 
-void str_print(unsigned char* source)
+Node* akinator_tree_read(char* source, Tree* akinator_tree)
 {
-    size_t i = 0;
-    while (source[i])
+    if (*source == '{')
     {
-        printf("%c", source[i++]);
-    }
+        printf("current symbol is {\n");
 
-    for (i = 0; i < STR_LEN; i++)
-    {
-        printf("source[%zu] = %c(%d)\n", i, source[i], source[i]);
+        if (source[1] == '}') 
+        {
+            printf("processed symbol is }\n");
+            return NULL;
+        }
+
+        printf("creating a new_node\n");
+
+        unsigned char* arg = arg_scanf(source);
+        printf("arg is %s\n", arg);  
+
+        Node* new_node = akinator_tree->root + (akinator_tree->node_count++);
+
+        memcpy(new_node->val, (char*)arg, sizeof(char) * STR_LEN);
+        new_node->left  = akinator_tree_read(source, akinator_tree);
+        new_node->right = akinator_tree_read(source, akinator_tree);
+
+        return new_node;
     }
 }
 
+// regular expression 
 
-unsigned char* str_scanf(void)
+unsigned char* arg_scanf(char* source)
 {
-    unsigned char* new_object = (unsigned char*)calloc(STR_LEN, sizeof(unsigned char));
+    unsigned char* arg = (unsigned char*)calloc(STR_LEN, rus_char_size);
 
     size_t i = 0;
-    size_t max_len = STR_LEN;
-    
-    //unsigned char first = (unsigned char)getchar();
-    do
+
+    source = skip_spaces(source);
+
+    if (*source == '"')
     {
-        if (i == max_len - 1)
-        {    
-            printf("max len\n");
-            new_object = (unsigned char*)realloc(new_object, max_len * 2);
-            max_len *= 2;
+        i++;
+        while (*(source++) != '"')
+        {
+            arg[i] = *source;
         }
-        new_object[i++] = (unsigned char)getchar();
-    }
-    while (new_object[i - 1] != '\n');
-
-    //printf("first = %c(%d)\n", first, first);
-    //new_object[0] = first;
-    printf("new_object[i - 1] = %c(%d)\n", new_object[i - 1], new_object[i - 1]);
-    new_object[i - 1] = '\0';
-
-    i = 0;
-    unsigned char* source = new_object;
-    while (source[i])
-    {
-        printf("%c", source[i++]);
+        return arg;
     }
 
-    printf("\n");
-    for (i = 0; i < STR_LEN; i++)
-    {
-        printf("source[%zu] = %c(%d)\n", i, source[i], source[i]);
-    }
+    return nullptr;
+}
 
-    str_print(new_object);
-
-    return new_object;
+char* skip_spaces(char* source)
+{
+    size_t i = 0;
+    while (*(source++) == ' ');
+    return source;
 }

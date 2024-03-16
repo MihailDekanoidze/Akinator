@@ -5,38 +5,32 @@
 
 #define BASE_NODE_COUNT 100
 #define INCREASE_COEF   2     
-#define STR_LEN 100
+#define STR_LEN         100
 
+static const size_t rus_char_size = sizeof('�'); 
 
-static const char START_NODE[BASE_NODE_COUNT] =  "неизвестно кто";  
+static const char START_NODE[STR_LEN] = "неизвестно кто";  
 
 typedef unsigned char Data;
 
-struct Node {
-        Data val[STR_LEN];
-        Node* left;
-        Node* right;
-        Node* previous;
-};
-
-typedef struct Node Node;
+typedef struct Node {
+    Data val[STR_LEN * rus_char_size];              //calloc / extern storage
+    Node* left;
+    Node* right;
+    Node* previous;
+} Node;
 
 struct Tree {
-        Node* root;
-        size_t node_count;
-        size_t capacity;
-        FILE* tree_log;
+    Node* root;             //rename
+    size_t node_count;
+    size_t capacity;
+    FILE* tree_log;
 };
 
 
 #define TREE_CALLOC_ERROR  NULL;
 const unsigned long int TREE_OPEN_FILE = NULL;
  
-
-
-
-
-
 
 typedef struct Node Node;
 
@@ -52,9 +46,13 @@ void akinator_playing(Tree* main_tree);
 int is_continue(Tree* main_tree);
 void object_add(Node* old_object, const char* new_object, const char* feature, Tree* main);
 unsigned char* str_scanf(void);
-void str_print(unsigned char* source);
 void object_processing(Node* curr_node, Tree* main_tree);
 size_t question(Node* curr_node);
 void node_list_print(Tree* main_tree);
+int negative_feature(unsigned char* feature);
+Node* akinator_tree_read(char* source, Tree* akinator_tree, size_t* pos);
+unsigned char* arg_scanf(char* source, size_t* pos);
+void skip_spaces(char* source, size_t* pos);
+void ClearBuffer(void);
 
 #endif // AKINATOR_H
