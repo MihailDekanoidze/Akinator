@@ -62,7 +62,7 @@ Node* object_search(Tree* akinator_tree)
 
 size_t question(Node* curr_node)
 {
-    printf("��� �������� ");
+    printf("Это существо ");
 
     size_t i = 0;
     while (curr_node->val[i])
@@ -70,12 +70,18 @@ size_t question(Node* curr_node)
         printf("%c", curr_node->val[i++]);
     }
 
-    printf(" ?\n�� / ���\n");
+    printf(" ?\nДа / Нет\n");
 
     char answer[50] = {};
-    scanf("%s", answer);
+    int correct_answer = scanf("%s", answer);
 
-    return strncmp(answer, "���", sizeof(STR_LEN));
+    if (!correct_answer)
+    {
+        printf("Не понял, давай ещё раз\n");
+        correct_answer = scanf("%s", answer);
+    }
+
+    return strncmp(answer, "Нет", sizeof(STR_LEN));
 }
 
 void object_processing(Node* curr_node, Tree* akinator_tree)
@@ -84,23 +90,23 @@ void object_processing(Node* curr_node, Tree* akinator_tree)
 
     if (answer)
     {
-        printf("� ��� ����!\n");
+        printf("Я это знал!\n");
         return; 
     }
 
-    printf("�� ����������� ����!\n");
-    printf("����� ��� �� ��� ?\n");
+    printf("Вы перехитрили меня!\n");
+    printf("Тогда кто же это?\n");
 
     unsigned char* new_object = str_scanf();
 
-    printf("��� %s ���������� �� %s?\n", new_object, curr_node->val);
+    printf("Чем %s отличается от %s?\n", new_object, curr_node->val);
 
     unsigned char* feature = str_scanf();
     printf("negative_feature(feature) = %d\n", negative_feature(feature));
 
     while (negative_feature(feature))
     {
-        printf("��������� ���� ������� � ������������� �����\n");
+        printf("Не 'некай' мне тут!\n");
         feature = str_scanf();
     }
 
@@ -108,7 +114,7 @@ void object_processing(Node* curr_node, Tree* akinator_tree)
 
     free(new_object);
     free(feature);
-    printf("� �������� ���...\n");
+    printf("Я это запомнил...\n");
 }
 
 unsigned char* str_scanf(void)
@@ -143,7 +149,7 @@ unsigned char* str_scanf(void)
 
 void object_add(Node* old_node, const char* new_object, const char* feature, Tree* akinator_tree)
 {           // akinator without tree
-    printf("old_node = %s\n", old_node->val);
+    //printf("old_node = %s\n", old_node->val);
 
     /*if (akinator_tree->node_count == akinator_tree->capacity)
         tree_increase_capasity(akinator_tree);*/
@@ -177,9 +183,9 @@ void object_add(Node* old_node, const char* new_object, const char* feature, Tre
     printf("old_node = %s\n", old_node->val);
 
     printf("feature_node->left->val = %s\n", feature_node->left->val);
-    printf(" ���������� �� ");
+    printf(" отличается от ");
     printf("feature_node->right->val =%s\n", feature_node->right->val); 
-    printf(" ���, ��� ");
+    printf(" тем, что ");
     printf("feature_node->val = %s\n", feature_node->val);
     printf("\n");
 
@@ -193,19 +199,25 @@ int is_continue(Tree* akinator_tree)
     tree_print(akinator_tree->root, akinator_tree->tree_log);
     node_list_print(akinator_tree);
 
-    printf("������� ���������� ? (�� / ���)\n");
+    printf("Желаешь ешё попытать удачу ? (Да / Нет)\n");
 
     char* answer = (char*) calloc(STR_LEN, sizeof(char));
-    scanf("%s", answer);
+    
+    int answer_scaned = scanf("%s", answer);
+    if (!answer_scaned)
+    {
+        printf("Пожалуйства повторите ввод ответа\n");
+        answer_scaned = scanf("%s", answer);
+    }
 
     tree_print(akinator_tree->root, akinator_tree->tree_log);
     node_list_print(akinator_tree);
 
-    if (strncmp(answer, "��", STR_LEN))
+    if (strncmp(answer, "Да", STR_LEN))
     {   
         free(answer);
         tree_detor(akinator_tree);
-        printf("���� ����� ��� ����� �����\n");
+        printf("Возвращайся когда будешь готов ещё раз сразиться со мной\n");
         return 0;
     }
     free(answer);
@@ -258,10 +270,10 @@ void tree_print(Node* tree, FILE* tree_log)
 
     if (tree != NULL)
     {
-        printf("{%s\n", tree->val);
+        fprintf(tree_log, "{%s\n", tree->val);
         tree_print(tree->left, tree_log);
         tree_print(tree->right, tree_log);
-        printf("}\n");
+        fprintf(tree_log, "}\n");
     }
 }
 
@@ -275,14 +287,8 @@ void node_list_print(Tree* tree)
 
 int negative_feature(unsigned char* feature)
 {
-    unsigned char ru_not[] = "��";
-    unsigned char ru_Not[] = "��";
-    unsigned char cmp_symbols[] = {feature[0], feature[1], feature[2], feature[3], '\0'};
-
-    //printf("cmp_symbols = %s\n", cmp_symbols);
-
-    return !((strncmp((char*)ru_not, (char*)feature, sizeof(ru_not))) 
-           || strncmp((char*)ru_Not, (char*)feature, sizeof(ru_not)));
+    return !(strncmp((char*)ru_yes, (char*)feature, sizeof(ru_yes))
+           || strncmp((char*)ru_Yes, (char*)feature, sizeof(ru_Yes)));
 }
 
 
@@ -371,10 +377,11 @@ unsigned char* arg_scanf(char* source, size_t* pos)
         (*pos)++;
         while (*(source + *(pos)) != '"')
         {
-            arg[i] = *(source + *pos);
+            arg[i] = (unsigned char)*(source + *pos);
             i++; (*pos)++;
         }
         (*pos)++;
+        skip_spaces(source, pos);
 
         //printf("in arg source = %s\n", source + *(pos));
         return arg;
@@ -386,8 +393,7 @@ unsigned char* arg_scanf(char* source, size_t* pos)
 
 void skip_spaces(char* source, size_t* pos)
 {
-    size_t i = 0;
-    while (*(source + *pos) == ' ');
+    while (*(source + *pos) == ' '){(*pos)++;}
     return;
 }
 
@@ -395,5 +401,5 @@ void ClearBuffer(void)
 {
     char ch = 0;
 
-    while ((ch = getchar()) != '\n' && ch != EOF) {}
+    while ((ch = (char)getchar()) != '\n' && ch != EOF) {}
 }

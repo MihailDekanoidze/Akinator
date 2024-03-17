@@ -7,6 +7,8 @@
 #define INCREASE_COEF   2     
 #define STR_LEN         100
 
+static const unsigned char ru_yes[] = "��";
+static const unsigned char ru_Yes[] = "��";
 static const size_t rus_char_size = sizeof('�'); 
 
 static const char START_NODE[STR_LEN] = "неизвестно кто";  

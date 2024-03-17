@@ -12,11 +12,11 @@ int main()
     TextInfo* buffer = (TextInfo*) calloc(1, sizeof(TextInfo));
     InputText(buffer, data);
 
-    printf("buffer = %s\n", (unsigned char*)(buffer->buffer));
+    /*printf("buffer = %s\n", (unsigned char*)(buffer->buffer));
     for (size_t i = 0; i < buffer->elemcount + 1; i++)
     {
         printf("buffer[%zu] = %c(%d)\n", i, *((unsigned char*)(buffer->buffer) + i), *((unsigned char*)(buffer->buffer) + i));
-    }
+    }*/
 
     fclose(data);
 

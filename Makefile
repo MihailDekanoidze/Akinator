@@ -22,16 +22,16 @@ undefined,unreachable,vla-bound,vptr
 all: Akinator
 
 Akinator:  InputText.o Akinator.o main.o  
-		g++ ./Apps/InputText.o ./Apps/Akinator.o ./Apps/main.o -o Akinator.exe 
+		g++ ./Apps/InputText.o ./Apps/Akinator.o ./Apps/main.o -o Akinator.exe $(FLAGS)
 
 InputText.o:
-		g++ ./source/InputText.cpp -c -o ./Apps/InputText.o
+		g++ ./source/InputText.cpp -c -o ./Apps/InputText.o $(FLAGS)
 
 Akinator.o:
-		g++ Akinator.cpp -c -o ./Apps/Akinator.o
+		g++ Akinator.cpp -c -o ./Apps/Akinator.o $(FLAGS)
 
 main.o:
-		g++ main.cpp -c -o ./Apps/main.o 
+		g++ main.cpp -c -o ./Apps/main.o $(FLAGS)
 
 clean:
 		./Apps rm -rf *.o
