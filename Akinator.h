@@ -56,5 +56,7 @@ Node* akinator_tree_read(char* source, Tree* akinator_tree, size_t* pos);
 unsigned char* arg_scanf(char* source, size_t* pos);
 void skip_spaces(char* source, size_t* pos);
 void ClearBuffer(void);
+Tree* akinator_upload_tree(FILE* data);
+void akinator_end(Tree* akinator_tree, FILE* data);
 
 #endif // AKINATOR_H

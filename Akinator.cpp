@@ -4,6 +4,8 @@
 
 #include "Akinator.h"
 #include "./include/others.h"
+#include "./include/InputText.h"
+
 
 Tree* tree_create(size_t node_count)
 {
@@ -35,6 +37,24 @@ Tree* tree_create(size_t node_count)
 }
 
 
+Tree* akinator_upload_tree(FILE* data)
+{
+    TextInfo* buffer = (TextInfo*)calloc(1, sizeof(TextInfo));
+    InputText(buffer, data);
+
+    fclose(data);
+
+    Tree* akinator_tree = tree_create(BASE_NODE_COUNT);
+    size_t pos = 0; 
+
+    akinator_tree_read((char*)(buffer->buffer), akinator_tree, &pos);
+    free(buffer->buffer);
+    free(buffer);
+
+    tree_print(akinator_tree->root, fopen("tree_log.cpp", "w"));
+
+    return akinator_tree;
+}
 
 Node* object_search(Tree* akinator_tree)                    
 {
@@ -54,7 +74,7 @@ Node* object_search(Tree* akinator_tree)
             curr_node = curr_node->right;
         }
 
-        printf("object_seached = %s\n", curr_node->val);
+        //printf("object_seached = %s\n", curr_node->val);
     }
 
     return curr_node;
@@ -62,15 +82,7 @@ Node* object_search(Tree* akinator_tree)
 
 size_t question(Node* curr_node)
 {
-    printf("Это существо ");
-
-    size_t i = 0;
-    while (curr_node->val[i])
-    {
-        printf("%c", curr_node->val[i++]);
-    }
-
-    printf(" ?\nДа / Нет\n");
+    printf("Это существо %s ?\nДа / Нет\n", curr_node->val);
 
     char answer[50] = {};
     int correct_answer = scanf("%s", answer);
@@ -102,7 +114,7 @@ void object_processing(Node* curr_node, Tree* akinator_tree)
     printf("Чем %s отличается от %s?\n", new_object, curr_node->val);
 
     unsigned char* feature = str_scanf();
-    printf("negative_feature(feature) = %d\n", negative_feature(feature));
+    //printf("negative_feature(feature) = %d\n", negative_feature(feature));
 
     while (negative_feature(feature))
     {
@@ -180,7 +192,7 @@ void object_add(Node* old_node, const char* new_object, const char* feature, Tre
     old_node->right = old_object;
     memcpy(old_node->val, feature, STR_LEN);
 
-    printf("old_node = %s\n", old_node->val);
+    /*printf("old_node = %s\n", old_node->val);
 
     printf("feature_node->left->val = %s\n", feature_node->left->val);
     printf(" отличается от ");
@@ -189,7 +201,7 @@ void object_add(Node* old_node, const char* new_object, const char* feature, Tre
     printf("feature_node->val = %s\n", feature_node->val);
     printf("\n");
 
-    node_list_print(akinator_tree);
+    node_list_print(akinator_tree);*/
 
     return;
 }
@@ -197,7 +209,7 @@ void object_add(Node* old_node, const char* new_object, const char* feature, Tre
 int is_continue(Tree* akinator_tree)
 {
     tree_print(akinator_tree->root, akinator_tree->tree_log);
-    node_list_print(akinator_tree);
+    //node_list_print(akinator_tree);
 
     printf("Желаешь ешё попытать удачу ? (Да / Нет)\n");
 
@@ -211,12 +223,12 @@ int is_continue(Tree* akinator_tree)
     }
 
     tree_print(akinator_tree->root, akinator_tree->tree_log);
-    node_list_print(akinator_tree);
+    //node_list_print(akinator_tree);
 
     if (strncmp(answer, "Да", STR_LEN))
     {   
         free(answer);
-        tree_detor(akinator_tree);
+        //tree_detor(akinator_tree);
         printf("Возвращайся когда будешь готов ещё раз сразиться со мной\n");
         return 0;
     }
@@ -263,17 +275,21 @@ void tree_detor(Tree* tree)
     free(tree);
 }
 
-void tree_print(Node* tree, FILE* tree_log)
+void tree_print(Node* tree, FILE* tree_data)
 {
     //printf("tree_print\n");
     //printf("tree is NULL = %d\n", tree == NULL);
 
     if (tree != NULL)
     {
-        fprintf(tree_log, "{%s\n", tree->val);
-        tree_print(tree->left, tree_log);
-        tree_print(tree->right, tree_log);
-        fprintf(tree_log, "}\n");
+        fprintf(tree_data, "{\"%s\"", tree->val);
+        tree_print(tree->left, tree_data);
+        tree_print(tree->right, tree_data);
+        fprintf(tree_data, "}");
+    }
+    else
+    {
+        fprintf(tree_data, "{}");
     }
 }
 
@@ -402,4 +418,10 @@ void ClearBuffer(void)
     char ch = 0;
 
     while ((ch = (char)getchar()) != '\n' && ch != EOF) {}
+}
+
+void akinator_end(Tree* akinator_tree, FILE* data)
+{
+    tree_print(akinator_tree->root, data);
+    tree_detor(akinator_tree);
 }

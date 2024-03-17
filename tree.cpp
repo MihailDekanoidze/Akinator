@@ -18,12 +18,9 @@ Tree* tree_create(size_t node_count)
     tree->root = root;
 
     tree->capacity = node_count;
-    tree->root->val  = START_ROOT;
     tree->root->left = NULL;
     tree->root->right = NULL;
     tree->root->previous = NULL;
-
-    tree->node_count++;
 
     FILE* tree_log = fopen("tree_log.cpp", "a+");
     
