@@ -310,66 +310,40 @@ int negative_feature(unsigned char* feature)
 
 Node* akinator_tree_read(char* source, Tree* akinator_tree, size_t* pos)
 {
+    skip_spaces(source, pos);
     if (*(source + *(pos)) == '{')
     {
-        /*printf("current symbol is %c\n", *source);
-        printf("Increase pos\n");
-        char pause = getchar();
-        ClearBuffer();*/
-
         (*pos)++;
-
-        //printf("current symbol is %c\n", *(source + *pos));
+        skip_spaces(source, pos);
 
         if (source[*pos] == '}') 
         {
-            //printf("processed symbol is }\n");
             (*pos)++;
             return NULL;
         }
 
-        //printf("\ncreating a new_node\n");
-
+        skip_spaces(source, pos);
         unsigned char* arg = arg_scanf(source, pos);
-        //printf("arg is %s\n", arg);  
-
+        
+        skip_spaces(source, pos);
         Node* new_node = akinator_tree->root + (akinator_tree->node_count++);
+        if (arg != NULL) memcpy(new_node->val, (char*)arg, sizeof(char) * STR_LEN);
 
-        memcpy(new_node->val, (char*)arg, sizeof(char) * STR_LEN);
         free(arg);
 
-        //printf("source = %s\n", source + *(pos));
-
+        skip_spaces(source, pos);
         new_node->left  = akinator_tree_read(source, akinator_tree, pos);
         (*pos)++;
 
-        /*printf("the left node for %s is %s\n\n", new_node->val, new_node->left->val);
-
-        printf("source after left = %s\n", source + *(pos));
-        printf("the next symbol after left is %c\n", *(source +*pos));*/
-
+        skip_spaces(source, pos);
         new_node->right = akinator_tree_read(source, akinator_tree, pos);
-        
-        /*printf("the right node for %s is %s\n\n", new_node->val, new_node->right->val);
-        
-        printf("source after right = %s\n", source + *(pos));
-        printf("the next symbol after right is %c\n\n", *(source +*pos));*/
 
         return new_node;
     }
     else
     {
-        /*printf("\nthe symbol different from '{' is '%c'\n", *(source + *pos));
-        printf("Increase pos from %zu to %zu\n", *pos, *(pos) + 1);
-
-        char pause = getchar();
-        ClearBuffer();*/
-
+        skip_spaces(source, pos);
         (*pos)++;
-
-        /*printf("pos = %zu\nbuffer[%zu] = %c(%d)\n", *pos, *pos, *(source + (*pos)));
-
-        printf("current symbol is %c(%d)\n", *(source + (*pos)), *(source + (*pos)));*/
     }
 
     return nullptr;
@@ -384,8 +358,8 @@ unsigned char* arg_scanf(char* source, size_t* pos)
     size_t i = 0;
 
     skip_spaces(source, pos);
-    /*printf("source = %s\n", source + *pos);
 
+    /*printf("source = %s\n", source + *pos);
     printf("symbol = %c\n", (unsigned char) (*(source + *pos)));*/
 
     if (*(source + (*pos)) == 34)
@@ -409,7 +383,7 @@ unsigned char* arg_scanf(char* source, size_t* pos)
 
 void skip_spaces(char* source, size_t* pos)
 {
-    while (*(source + *pos) == ' '){(*pos)++;}
+    while ((*(source + *pos) == ' ') || (*(source + *pos) == '\n')){(*pos)++;}
     return;
 }
 
