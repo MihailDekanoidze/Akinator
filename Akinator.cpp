@@ -26,16 +26,64 @@ Tree* tree_create(size_t node_count)
     tree->node_list->right = NULL;
     tree->node_list->previous = NULL;
 
-    FILE* tree_log = fopen("tree_log.cpp", "a+");
-    
-    /*if (!tree_log)
-        return TREE_OPEN_FILE;*/
-
+    FILE* tree_log = fopen("tree_log.cpp", "w");
     tree->tree_log = tree_log;
     
     return tree;
 }
 
+void node_list_print(Tree* tree)
+{
+    for (size_t i = 0; i < tree->node_count; i++)
+    {
+        printf("\nnode[%zu] = %s\n", i, (tree->node_list + i)->val);
+    }
+}
+
+void tree_increase_capasity(Tree* tree)
+{
+    printf("increase capacity!\n");
+    printf("old capacity = %zu\n", tree->capacity);
+
+    tree->node_list = (Node*)realloc(tree->node_list, sizeof(Node) * tree->capacity * INCREASE_COEF);
+    tree->capacity *= 2;
+
+    printf("new capacity = %zu\n", tree->capacity);
+
+    return;
+}
+
+void tree_detor(Tree* tree)
+{
+    free(tree->node_list);
+    
+    fclose(tree->tree_log);
+
+    tree->capacity = 0;
+    tree->node_count = 0;
+
+    free(tree);
+}
+
+void tree_print(Node* tree, FILE* tree_data, size_t* level)
+{
+    if (tree == NULL) return;
+
+    fprint_nchar(tree_data, '\t', *level);
+    fprintf(tree_data, "{\n");
+    (*level)++;
+
+    fprint_nchar(tree_data, '\t', *level);
+    fprintf(tree_data, "\"%s\"\n", tree->val);
+
+    tree_print(tree->left, tree_data, level);
+    tree_print(tree->right, tree_data, level);
+
+    (*level)--;
+
+    fprint_nchar(tree_data, '\t', *level);
+    fprintf(tree_data, "}\n");
+}
 
 Tree* akinator_upload_tree(FILE* data)
 {
@@ -171,37 +219,15 @@ void object_add(Node* old_node, const char* new_object, const char* feature, Tre
 {           // akinator without tree
     //printf("old_node = %s\n", old_node->val);
 
-    /*if (akinator_tree->node_count == akinator_tree->capacity)
-        tree_increase_capasity(akinator_tree);*/
-
-    Node* new_node = &(akinator_tree->node_list)[akinator_tree->node_count++];
-
-    new_node->left  = NULL;
-    new_node->right = NULL;
-    new_node->previous = old_node;
-    memcpy(new_node->val, new_object, STR_LEN);
-
-    /*if (akinator_tree->node_count == akinator_tree->capacity)
-        tree_increase_capasity(akinator_tree);*/
-
-    Node* old_object = &(akinator_tree->node_list)[akinator_tree->node_count++];
-
-    old_object->left  = NULL;
-    old_object->right = NULL;
-    old_object->previous = old_node;
-    memcpy(old_object->val, old_node->val, STR_LEN);
-
-    //printf("tree capacity = %zu\n", akinator_tree->capacity);
-    //printf("tree_node_count = %zu\n", akinator_tree->node_count);
-
-    Node* feature_node = old_node;
-
-    old_node->left  = new_node;
-    old_node->right = old_object;
+    tree_add_node(old_node, left, new_object, akinator_tree);
+    tree_add_node(old_node, right, (const char*) old_node->val, akinator_tree);
     memcpy(old_node->val, feature, STR_LEN);
 
+    /*if (akinator_tree->node_count == akinator_tree->capacity)
+        tree_increase_capasity(akinator_tree);*/
+    //printf("tree capacity = %zu\n", akinator_tree->capacity);
+    //printf("tree_node_count = %zu\n", akinator_tree->node_count);
     /*printf("old_node = %s\n", old_node->val);
-
     printf("feature_node->left->val = %s\n", feature_node->left->val);
     printf(" отличается от ");
     printf("feature_node->right->val =%s\n", feature_node->right->val); 
@@ -260,64 +286,6 @@ void akinator_playing(Tree* akinator_tree)
     }
 }
 
-
-void tree_increase_capasity(Tree* tree)
-{
-    printf("increase capacity!\n");
-    printf("old capacity = %zu\n", tree->capacity);
-
-    tree->node_list = (Node*)realloc(tree->node_list, sizeof(Node) * tree->capacity * INCREASE_COEF);
-    tree->capacity *= 2;
-
-    printf("new capacity = %zu\n", tree->capacity);
-
-    return;
-}
-
-void tree_detor(Tree* tree)
-{
-    free(tree->node_list);
-    
-    fclose(tree->tree_log);
-
-    tree->capacity = 0;
-    tree->node_count = 0;
-
-    free(tree);
-}
-
-void tree_print(Node* tree, FILE* tree_data, size_t* level)
-{
-    //printf("tree_print\n");
-    //printf("tree is NULL = %d\n", tree == NULL);
-
-    if (tree == NULL) return;
-
-    fprint_nchar(tree_data, '\t', *level);
-    fprintf(tree_data, "{\n");
-    (*level)++;
-
-    fprint_nchar(tree_data, '\t', *level);
-    fprintf(tree_data, "\"%s\"\n", tree->val);
-
-    tree_print(tree->left, tree_data, level);
-    tree_print(tree->right, tree_data, level);
-
-    (*level)--;
-    
-    //fprintf(tree_data, "\n");
-    fprint_nchar(tree_data, '\t', *level);
-    fprintf(tree_data, "}\n");
-}
-
-void node_list_print(Tree* tree)
-{
-    for (size_t i = 0; i < tree->node_count; i++)
-    {
-        printf("\nnode[%zu] = %s\n", i, (tree->node_list + i)->val);
-    }
-}
-
 int negative_feature(unsigned char* feature)
 {
     return !(strncmp((char*)ru_yes, (char*)feature, sizeof(ru_yes))
@@ -327,89 +295,99 @@ int negative_feature(unsigned char* feature)
 
 Node* akinator_tree_read(char* source, Tree* akinator_tree, size_t* pos)
 {
-    //printf("begin read\n");
-    //printf("the reamined tree = \n%s\n", source + *(pos));
+    //printf("\nbegin read\n");
+    //printf("the remained tree = \n%s\n", source + *(pos));
 
     skip_spaces(source, pos);
 
-    //printf("the reamined tree = \n%s\n", source + *(pos));
+    //printf("the remained tree = \n%s\n", source + *(pos));
     //printf("the next symbol is %c(%d)\n", *(source + *(pos)), *(source + *(pos)));
     
     if (*(source + *(pos)) == '{')
     {
         //printf("processing symbol {\n");
+        
         (*pos)++;
+        
         //printf("the next processing symbol is %c(%d)\n", *(source + *(pos)), *(source + *(pos)));
-        //printf("the reamined tree = \n%s\n", source + *(pos));
+        //printf("the remained tree = \n%s\n", source + *(pos));
         
         skip_spaces(source, pos);
         
         //printf("the reamined tree = \n%s\n", source + *(pos));
         //printf("the next processing symbol is %c(%d)\n", *(source + *(pos)), *(source + *(pos)));
         
-        if (source[*pos] == '}') 
+        if (*(source + *(pos)) == '}') 
         {   
             //printf("processing symbol }\n");
+            
             (*pos)++;
+            
             //printf("the next processing symbol is %c(%d)\n", *(source + *(pos)), *(source + *(pos)));
-            //printf("the reamined tree = \n%s\n", source + *(pos));
+            //printf("the remained tree = \n%s\n", source + *(pos));
+            
             return NULL;
         }
-        //printf("the reamined tree = \n%s\n", source + *(pos));
-        //printf("the reamined tree = \n%s\n", source + *(pos));
+
+        //printf("the remained tree = \n%s\n", source + *(pos));
         
         unsigned char* arg = arg_scanf(source, pos);
 
-        //printf("the reamined tree = \n%s\n", source + *(pos));
-        
-        skip_spaces(source, pos);
-
-        //printf("the reamined tree = \n%s\n", source + *(pos));
+        //printf("the remained tree after arg scanned = \n%s\n", source + *(pos));
 
         Node* new_node = akinator_tree->node_list + (akinator_tree->node_count++);
         if (arg != NULL) memcpy(new_node->val, (char*)arg, sizeof(char) * STR_LEN);
 
-        free(arg);
-
-        //printf("the reamined tree = \n%s\n", source + *(pos));
-
         skip_spaces(source, pos);
-
-        //printf("the reamined tree = \n%s\nbegin left\n", source + *(pos));
         
-        new_node->left  = akinator_tree_read(source, akinator_tree, pos);
-        (*pos)++;
-
-        if (new_node->left == NULL) 
+        if (*(source + *(pos)) == '}') 
         {
+            //printf("the next symbol is '}'\n");
+            
+            new_node->left  = NULL;
             new_node->right = NULL;
+            skip_spaces(source, pos);          
         }
         else
         {
+            //printf("the remained tree = \n%s\n", source + *(pos));
             //printf("the next processing symbol is %c(%d)\n", *(source + *(pos)), *(source + *(pos)));
+            //printf("\nbegin left for %s\n", arg);
+            
+            new_node->left  = akinator_tree_read(source, akinator_tree, pos);
             skip_spaces(source, pos);
 
-            //printf("the reamined tree = \n%s\n", source + *(pos));
-            //printf("the next processing symbol is %c(%d)\nbegin right\n", *(source + *(pos)), *(source + *(pos)));
-            
-            new_node->right = akinator_tree_read(source, akinator_tree, pos);
-            (*pos)++;
+            //printf("the next processing symbol is %c(%d)\n", *(source + *(pos)), *(source + *(pos)));
+            (*pos)++; 
+            //printf("left end for %s\n", arg);
 
-            //printf("the reamined tree = \n%s\n", source + *(pos));
+            skip_spaces(source, pos);
+            
+            //printf("the next processing symbol is %c(%d)\n", *(source + *(pos)), *(source + *(pos)));
+            //printf("the remained tree = \n%s\n", source + *(pos));
+            //printf("the next processing symbol is %c(%d)\n", *(source + *(pos)), *(source + *(pos)));
+            //printf("\nbegin right for %s\n", arg);
+
+            new_node->right = akinator_tree_read(source, akinator_tree, pos);
+            skip_spaces(source, pos);
+            (*pos)++;
+            //printf("end right for %s\n", arg);
+
+            //printf("the remained tree after arg scanned = \n%s\n", source + *(pos));
         }
-        
+        free(arg);
         return new_node;
     }
     else
     {
         //printf("symbol is not {, but %c(%d)\n", *(source + *(pos)), *(source + *(pos)));
-        //printf("the reamined tree = \n%s\n", source + *(pos));
+        //printf("the remained tree = \n%s\n", source + *(pos));
         
         skip_spaces(source, pos);
         (*pos)++;
         return NULL;
         
-        //printf("the reamined tree = \n%s\n", source + *(pos));
+        //printf("the remained tree = \n%s\n", source + *(pos));
     }
 
     //printf("Unexpected exit in pos = %zu\n", *pos);
@@ -446,6 +424,8 @@ unsigned char* arg_scanf(char* source, size_t* pos)
         return arg;
     }
 
+    //printf("arg is NULL\n");
+
     free(arg);
     return nullptr;
 }
@@ -478,4 +458,39 @@ void akinator_end(Tree* akinator_tree, FILE* data)
 void fprint_nchar(FILE* dest, char symbol, size_t count)
 {
     for (size_t i = 0; i < count; i++) {fprintf(dest, "%c", symbol);}
+}
+
+
+Node* tree_add_node(Node* parent, child subtree, const char* val, Tree* curr_tree)
+{
+    if (curr_tree->node_count == curr_tree->capacity)
+        tree_increase_capasity(curr_tree);
+
+    Node* new_node = &(curr_tree->node_list)[curr_tree->node_count++];
+
+    new_node->left  = NULL;
+    new_node->right = NULL;
+    new_node->previous = parent;
+    memcpy(new_node->val, val, STR_LEN);
+
+    switch (subtree)
+    {
+        case left:
+        {
+            parent->left = new_node;
+            break;
+        }
+        case right:
+        {
+            parent->right = new_node;
+            break;
+        }
+        default:
+        {
+            printf("Incorrect child\n");
+            return NULL;
+        }
+    }
+
+    return new_node;
 }

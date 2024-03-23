@@ -15,6 +15,13 @@ static const char START_NODE[STR_LEN] = "неизвестно кто";
 
 typedef unsigned char Data;
 
+enum child
+{
+    left  = 1,
+    right = 2
+};
+
+
 typedef struct Node {
     Data val[STR_LEN * rus_char_size];              //calloc / extern storage
     Node* left;
@@ -59,5 +66,6 @@ void ClearBuffer(void);
 Tree* akinator_upload_tree(FILE* data);
 void akinator_end(Tree* akinator_tree, FILE* data);
 void fprint_nchar(FILE* dest, char symbol, size_t count);
+Node* tree_add_node(Node* parent, child subtree, const char* val, Tree* curr_tree);
 
 #endif // AKINATOR_H
