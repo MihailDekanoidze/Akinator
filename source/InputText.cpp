@@ -42,6 +42,7 @@ struct TextInfo* InputText(TextInfo* text, FILE* file)
     text->buffer = buffer;
     text->elemcount = elemcount;
 
+
     //printf("char_read = %d\n", elemcount);
     //charprint(text);
 

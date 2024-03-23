@@ -7,9 +7,9 @@
 #define INCREASE_COEF   2     
 #define STR_LEN         100
 
-static const unsigned char ru_yes[] = "��";
-static const unsigned char ru_Yes[] = "��";
-static const size_t rus_char_size = sizeof('�'); 
+static const unsigned char ru_yes[] = "да";
+static const unsigned char ru_Yes[] = "Да";
+static const size_t rus_char_size = sizeof('ф'); 
 
 static const char START_NODE[STR_LEN] = "неизвестно кто";  
 
@@ -23,7 +23,7 @@ typedef struct Node {
 } Node;
 
 struct Tree {
-    Node* root;             //rename
+    Node* node_list;             //rename
     size_t node_count;
     size_t capacity;
     FILE* tree_log;
@@ -39,7 +39,7 @@ typedef struct Node Node;
 Tree* tree_create(size_t node_count);
 void node_insert(Tree* tree, Data val);
 Node* node_search(Tree* tree, Data val);
-void tree_print(Node* tree, FILE* tree_log);
+void tree_print(Node* tree, FILE* tree_log, size_t* level);
 void tree_increase_capasity(Tree* tree);
 void tree_detor(Tree* tree);
 
@@ -58,5 +58,6 @@ void skip_spaces(char* source, size_t* pos);
 void ClearBuffer(void);
 Tree* akinator_upload_tree(FILE* data);
 void akinator_end(Tree* akinator_tree, FILE* data);
+void fprint_nchar(FILE* dest, char symbol, size_t count);
 
 #endif // AKINATOR_H
