@@ -1,0 +1,40 @@
+Function StackError StackCtor(Stack*, size_t) in line 138 in file ./source/Stack.cpp end
+Function StackError StackPush(Stack*, elem_t) in line 145 in file ./source/Stack.cpp begin
+Command_PUSH (1)
+Function StackError StackPush(Stack*, elem_t) in line 156 in file ./source/Stack.cpp end
+Function StackError StackPush(Stack*, elem_t) in line 145 in file ./source/Stack.cpp begin
+Command_PUSH (1)
+Function StackError StackPush(Stack*, elem_t) in line 156 in file ./source/Stack.cpp end
+Function StackError StackPop(Stack*, elem_t*) in line 163 in file ./source/Stack.cpp begin
+Command_POP(1)
+Function StackError StackPop(Stack*, elem_t*) in line 188 in file ./source/Stack.cpp end
+Function StackError StackPush(Stack*, elem_t) in line 145 in file ./source/Stack.cpp begin
+Command_PUSH (2)
+Function StackError StackPush(Stack*, elem_t) in line 156 in file ./source/Stack.cpp end
+Function StackError StackPop(Stack*, elem_t*) in line 163 in file ./source/Stack.cpp begin
+Command_POP(2)
+Function StackError StackPop(Stack*, elem_t*) in line 188 in file ./source/Stack.cpp end
+Function StackError StackPop(Stack*, elem_t*) in line 163 in file ./source/Stack.cpp begin
+Command_POP(1)
+Function StackError StackPop(Stack*, elem_t*) in line 188 in file ./source/Stack.cpp end
+Function StackError StackPush(Stack*, elem_t) in line 145 in file ./source/Stack.cpp begin
+Command_PUSH (2)
+Function StackError StackPush(Stack*, elem_t) in line 156 in file ./source/Stack.cpp end
+Function StackError StackPush(Stack*, elem_t) in line 145 in file ./source/Stack.cpp begin
+Command_PUSH (1)
+Function StackError StackPush(Stack*, elem_t) in line 156 in file ./source/Stack.cpp end
+Function StackError StackPop(Stack*, elem_t*) in line 163 in file ./source/Stack.cpp begin
+Command_POP(1)
+Function StackError StackPop(Stack*, elem_t*) in line 188 in file ./source/Stack.cpp end
+Function StackError StackPush(Stack*, elem_t) in line 145 in file ./source/Stack.cpp begin
+Command_PUSH (2)
+Function StackError StackPush(Stack*, elem_t) in line 156 in file ./source/Stack.cpp end
+Function StackError StackPush(Stack*, elem_t) in line 145 in file ./source/Stack.cpp begin
+Command_PUSH (1)
+Function StackError StackPush(Stack*, elem_t) in line 156 in file ./source/Stack.cpp end
+Function StackError StackPush(Stack*, elem_t) in line 145 in file ./source/Stack.cpp begin
+Command_PUSH (1)
+Function StackError StackPush(Stack*, elem_t) in line 156 in file ./source/Stack.cpp end
+Function void StackDtor(Stack*) in line 198 in file ./source/Stack.cpp begin
+Function void StackClear(Stack*) in line 260 in file ./source/Stack.cpp begin
+Function void StackClear(Stack*) in line 266 in file ./source/Stack.cpp end
