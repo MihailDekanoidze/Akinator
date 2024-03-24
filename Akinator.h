@@ -2,23 +2,25 @@
 #define AKINATOR_H
 
 #include <stdio.h>
+#include <assert.h>
 
 #define BASE_NODE_COUNT 100
 #define TREE_NODE_INCREASE_COEF   20     
 #define STR_LEN         100
 #define OBJECT_FOUND    1 << 7
 #define OBJECT_N_FOUND  1 << 8
+#define RUS_CHAR_SIZE   sizeof('ф')
 
 static const unsigned char ru_yes[] = "да";
 static const unsigned char ru_Yes[] = "Да";
-static const size_t rus_char_size = sizeof('ф'); 
+
 
 static const char START_NODE[STR_LEN] = "неизвестно кто";  
 
 typedef unsigned char Data;
 
-#define FOPEN(file_name, mode) fopen(file_name, mode); fprintf(stderr, "open: %s on line: %d %s\n", #file_name, __LINE__, __PRETTY_FUNCTION__); 
-#define FCLOSE(file_name) int FUCK_MY_ASS_CHECK = fclose(file_name); fprintf(stderr, "close: %s  on line: %d %s\n", #file_name, __LINE__, __PRETTY_FUNCTION__); \
+#define FOPEN(file_name, mode) fopen(file_name, mode); /*fprintf(stderr, "open: %s on line: %d %s\n", #file_name, __LINE__, __PRETTY_FUNCTION__);*/ 
+#define FCLOSE(file_name) int FUCK_MY_ASS_CHECK = fclose(file_name); /*fprintf(stderr, "close: %s  on line: %d %s\n", #file_name, __LINE__, __PRETTY_FUNCTION__);*/ \
     if (FUCK_MY_ASS_CHECK != 0) {fprintf(stderr, "meow!!\n");}
 
 enum child
@@ -29,7 +31,7 @@ enum child
 
 
 typedef struct Node {
-    Data val[STR_LEN * rus_char_size];              //calloc / extern storage
+    Data val[STR_LEN * RUS_CHAR_SIZE];              //calloc / extern storage
     Node* left;
     Node* right;
     Node* previous;
@@ -44,7 +46,7 @@ struct Tree {
 
 
 #define TREE_CALLOC_ERROR  NULL;
-const unsigned long int TREE_OPEN_FILE = NULL;
+//const unsigned long int TREE_OPEN_FILE = NULL;
  
 
 typedef struct Node Node;
@@ -82,7 +84,5 @@ void                object_search(Tree* tree);
 void                object_compare(Tree* akinator_tree);
 void                game_mod_playing(Tree* akinator_tree);
 struct Stack*       way_stack(Tree* tree, char* val);
-
-int                 mystrcmp(const void * str1, const void * str2);
 
 #endif // AKINATOR_H

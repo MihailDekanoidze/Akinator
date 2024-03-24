@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <limits.h>
+#include <assert.h>
 
 typedef int elem_t;
 typedef uint64_t canary;

@@ -9,5 +9,5 @@ int mystrcmp(const void * str1, const void * str2)
     {
         i++;
     }
-    return ptr1[i] - ptr2[i];
+    return i;
 }

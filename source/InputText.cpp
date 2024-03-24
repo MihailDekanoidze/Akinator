@@ -8,9 +8,9 @@ size_t fsize(FILE* file)
     size_t begin = 0;
     size_t end = 0;
 
-    begin = ftell(file);
+    begin = (size_t)ftell(file);
     fseek(file, 0, SEEK_END);
-    end = ftell(file);
+    end = (size_t)ftell(file);
 
     return end - begin;
 }

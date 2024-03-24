@@ -28,6 +28,8 @@ const char* stack_errors_message[] =
 
 StackError StackPrint(struct Stack *st)
 {
+    assert(st != NULL);
+
     LOG_FUNCTION_BEGIN
 
     FILE* log = st->stack_log;
@@ -195,6 +197,8 @@ StackError StackPop(struct Stack* st, elem_t* value)
 
 void StackDtor(struct Stack* st)
 {   
+    
+
     LOG_FUNCTION_BEGIN
 
     StackClear(st);
@@ -304,7 +308,7 @@ int StackErrorCheck(struct Stack* st)
     
     LOG_FUNCTION_END
     
-    return st->error;
+    return (int)st->error;
 }
 
 StackError StackChangeCapacity(Stack* st, const size_t coef_capacity)

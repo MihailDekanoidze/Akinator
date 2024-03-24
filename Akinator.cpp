@@ -151,7 +151,7 @@ size_t question(Node* curr_node)
         correct_answer = scanf("%s", answer);
     }
 
-    return strncmp(answer, "Нет", sizeof(STR_LEN));
+    return (size_t)strncmp(answer, "Нет", sizeof(STR_LEN));
 }
 
 void object_processing(Node* curr_node, Tree* akinator_tree)
@@ -290,8 +290,8 @@ void akinator_playing(Tree* akinator_tree)
 
 int negative_feature(unsigned char* feature)
 {
-    return !(strncmp((char*)ru_yes, (char*)feature, sizeof(ru_yes))
-           || strncmp((char*)ru_Yes, (char*)feature, sizeof(ru_Yes)));
+    return !(strncmp((const char*)ru_yes, (const char*)feature, sizeof(ru_yes))
+           || strncmp((const char*)ru_Yes, (const char*)feature, sizeof(ru_Yes)));
 }
 
 
@@ -399,7 +399,7 @@ Node* akinator_tree_read(char* source, Tree* akinator_tree, size_t* pos)
 
 unsigned char* arg_scanf(char* source, size_t* pos)
 {
-    unsigned char* arg = (unsigned char*)calloc(STR_LEN, rus_char_size);
+    unsigned char* arg = (unsigned char*)calloc(STR_LEN, RUS_CHAR_SIZE);
     
     //printf("before arg source = %s\n", source + *(pos));
     
@@ -454,7 +454,7 @@ void akinator_end(Tree* akinator_tree)
 {
     FILE* output = FOPEN("tree.txt", "wb");
 
-    printf("in akinator ending\n");
+    //printf("in akinator ending\n");
 
     size_t level = 0;
     tree_print(akinator_tree->node_list, output, &level);
@@ -570,9 +570,18 @@ void object_search(Tree* tree)
 
 void difinition_print(Tree* tree, Stack* way_to_obj, size_t start_pos, size_t end_pos)
 {
-    size_t level = start_pos;
 
-    Node* curr_node = tree->node_list + start_pos;
+    size_t level = 0;
+
+    Node* curr_node = tree->node_list;
+
+    while (level != start_pos)
+    {
+        if (way_to_obj->data[level] == left) curr_node = curr_node->left;
+        if (way_to_obj->data[level] == right) curr_node = curr_node->right;
+
+        level++;
+    }
 
     while (level != end_pos)
     {
@@ -580,8 +589,8 @@ void difinition_print(Tree* tree, Stack* way_to_obj, size_t start_pos, size_t en
 
         printf(" %s ", curr_node->val);
 
-        if (level == way_to_obj->size - 2)  printf("и");
-        else if (level != way_to_obj->size - 1) printf(",");
+        if (level == end_pos - 2)  printf("и");
+        else if (level != end_pos - 1) printf(",");
 
         if ((way_to_obj->data)[level] == left) curr_node = curr_node->left;
         else curr_node = curr_node->right;
@@ -607,14 +616,16 @@ int menu(void)
     printf("\n");
 
     int option = 0;
-    scanf("%d", &option);
+    int option_scaned = scanf("%d", &option);
 
-    while ((option > 4) || (option < 1))
+    while ((option > 4) || (option < 1) || (option_scaned == 0))
     {
         printf("Выберите режим снова\n");
         ClearBuffer();
-        scanf("%d", &option);
+        option_scaned = scanf("%d", &option);
     }
+
+
 
     return option;
 }
@@ -650,6 +661,8 @@ void game_mod_playing(Tree* akinator_tree)
 
 void object_compare(Tree* akinator_tree)
 {
+    assert(akinator_tree != NULL);
+
     char* val1 = (char*)calloc(STR_LEN, sizeof(char));
     char* val2 = (char*)calloc(STR_LEN, sizeof(char));
 
@@ -660,6 +673,8 @@ void object_compare(Tree* akinator_tree)
 
     printf("Второй объект:\n");
     val2 = (char*)str_scanf();
+
+    printf("\n");
 
     Stack* way_to_obj1 = way_stack(akinator_tree, val1);
 
@@ -695,16 +710,34 @@ void object_compare(Tree* akinator_tree)
         }
         else
         {
-            size_t start_pos = (mystrcmp(way_to_obj1->data, way_to_obj2)) / (sizeof(elem_t)) + 1;
+            size_t curr_pos = 0;
+
+            /*printf("way_to_obj1:\n");
+            StackPrint(way_to_obj1);
+
+            printf("way_to_obj2:\n");
+            StackPrint(way_to_obj2);*/
+
+            while (way_to_obj1->data[curr_pos] == way_to_obj2->data[curr_pos]){curr_pos++;} 
+
+            //printf("curr_pos = %zu\n", curr_pos);           
 
             printf("%s похож на %s тем, что ", val1, val2);
-            difinition_print(akinator_tree, way_to_obj1, 0, start_pos - 1);
+            difinition_print(akinator_tree, way_to_obj1, 0, curr_pos);
 
             printf("Но %s ", val1);
-            difinition_print(akinator_tree, way_to_obj1, start_pos, way_to_obj1->size);
+            difinition_print(akinator_tree, way_to_obj1, curr_pos, way_to_obj1->size);
 
             printf("А %s ", val2);
-            difinition_print(akinator_tree, way_to_obj1, start_pos, way_to_obj2->size);
+            difinition_print(akinator_tree, way_to_obj2, curr_pos, way_to_obj2->size);
+            printf("\n");
+
+            free(val1);
+            free(val2);
+            StackDtor(way_to_obj1);
+            free(way_to_obj1);
+            StackDtor(way_to_obj2);
+            free(way_to_obj2);
         }
     }    
 
@@ -720,6 +753,7 @@ struct Stack* way_stack(Tree* tree, char* val)
     if (way_search(tree->node_list, val, way_to_obj) == OBJECT_N_FOUND)
     {
         StackDtor(way_to_obj);
+        free(way_to_obj);
         return NULL;
     }
     else
@@ -728,14 +762,4 @@ struct Stack* way_stack(Tree* tree, char* val)
     }
 }
 
-int mystrcmp(const void * str1, const void * str2)
-{
-    char* ptr1 = (char*) str1;
-    char* ptr2 = (char*) str2;
-    int i = 0;
-    while ((ptr1[i] != '\0') && (ptr2[i] != '\0') && (ptr1[i] == ptr2[i]))
-    {
-        i++;
-    }
-    return i;
-}
+
