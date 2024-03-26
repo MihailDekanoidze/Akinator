@@ -21,14 +21,17 @@ undefined,unreachable,vla-bound,vptr
 
 all: Akinator
 
-Akinator:  InputText.o Stack.o Akinator.o main.o  
-		@g++ ./Apps/InputText.o ./Apps/Stack.o ./Apps/Akinator.o ./Apps/main.o -o Akinator.exe $(FLAGS)
+Akinator:  InputText.o Stack.o Tree.o Akinator.o main.o  
+		@g++ ./Apps/InputText.o ./Apps/Stack.o ./Apps/Tree.o ./Apps/Akinator.o ./Apps/main.o -o Akinator.exe $(FLAGS)
 
 InputText.o:
 		@g++ ./source/InputText.cpp -c -o ./Apps/InputText.o $(FLAGS)
 
 Stack.o:
 		@g++ ./source/Stack.cpp -c -o ./Apps/Stack.o $(FLAGS)
+
+Tree.o:
+		@g++ ./source/Tree.cpp -c -o ./Apps/Tree.o $(FLAGS)
 
 Akinator.o:
 		@g++ Akinator.cpp -c -o ./Apps/Akinator.o $(FLAGS)
@@ -41,3 +44,6 @@ clean:
 
 run:
 		./Akinator.exe
+
+image:
+		dot tree.dot -T png -o tree.png

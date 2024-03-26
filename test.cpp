@@ -17,12 +17,7 @@ void fprint_nchar(FILE* dest, char symbol, size_t count)
 int main()
 {
     
-
+    printf("%*s\n",12,  "a");
     return 0;
 }
 
-int test_function(int a)
-{
-    a++;
-    int b = test_function(a + 3);
-}

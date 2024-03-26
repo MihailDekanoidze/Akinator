@@ -6,19 +6,13 @@
 
 int main()
 {
-    FILE* data_base = FOPEN("tree.txt", "rb");
+    Tree* akinator_tree = akinator_upload_tree("tree.txt");
 
-    Tree* akinator_tree = akinator_upload_tree(data_base);
+    graph_image(akinator_tree->node_list);
 
-    game_mod_playing(akinator_tree);
-
-    //object_search(akinator_tree);
-
+    //game_mod_playing(akinator_tree);
 
     akinator_end(akinator_tree);
 
     return 0;
 }
-
-    /*tree_print(akinator_tree->root, output);
-    fclose(output);*/

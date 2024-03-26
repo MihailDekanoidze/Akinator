@@ -1,109 +1,31 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "Akinator.h"
+#include "./include/Tree.h"
 #include "./include/others.h"
 #include "./include/InputText.h"
 #include "./include/Stack.h"
 
 
-Tree* tree_create(size_t node_count)
+
+Tree* akinator_upload_tree(const char* file_name)
 {
-    Tree* tree = (Tree*)calloc(1, sizeof(Tree));
+    FILE* data = FOPEN(file_name, "rb");
 
-    if (!tree)
-        return TREE_CALLOC_ERROR;
-    
-    Node* root = (Node*) calloc(node_count, sizeof(Node));
-
-    if (!root)
-        return TREE_CALLOC_ERROR;
-
-    tree->node_list = root;
-
-    tree->capacity = node_count;
-    tree->node_list->left = NULL;
-    tree->node_list->right = NULL;
-    tree->node_list->previous = NULL;
-
-    FILE* tree_log = FOPEN("tree_log.cpp", "w");
-    tree->tree_log = tree_log;
-    
-    return tree;
-}
-
-void node_list_print(Tree* tree)
-{
-    for (size_t i = 0; i < tree->node_count; i++)
-    {
-        printf("\nnode[%zu] = %s\n", i, (tree->node_list + i)->val);
-    }
-}
-
-void tree_increase_capasity(Tree* tree)
-{
-    printf("increase capacity!\n");
-    printf("old capacity = %zu\n", tree->capacity);
-
-    tree->node_list = (Node*)realloc(tree->node_list, sizeof(Node) * tree->capacity * TREE_NODE_INCREASE_COEF);
-    tree->capacity *= 2;
-
-    printf("new capacity = %zu\n", tree->capacity);
-
-    return;
-}
-
-void tree_detor(Tree* tree)
-{
-    free(tree->node_list);
-    
-    FCLOSE(tree->tree_log);
-
-    tree->capacity = 0;
-    tree->node_count = 0;
-
-    free(tree);
-}
-
-void tree_print(Node* tree, FILE* tree_data, size_t* level)
-{
-    if (tree == NULL) return;
-
-    fprint_nchar(tree_data, '\t', *level);
-    fprintf(tree_data, "{\n");
-    (*level)++;
-
-    fprint_nchar(tree_data, '\t', *level);
-    fprintf(tree_data, "\"%s\"\n", tree->val);
-
-    tree_print(tree->left, tree_data, level);
-    tree_print(tree->right, tree_data, level);
-
-    (*level)--;
-
-    fprint_nchar(tree_data, '\t', *level);
-    fprintf(tree_data, "}\n");
-}
-
-Tree* akinator_upload_tree(FILE* data)
-{
     TextInfo* input_buffer = (TextInfo*)calloc(1, sizeof(TextInfo));
     InputText(input_buffer, data);
 
     FCLOSE(data);
 
-    /*for (size_t i = 0; i < input_buffer->elemcount; i++)
-    {
-        printf("buffer[%zu] = %c(%d)\n", i, ((char*)(input_buffer->buffer))[i], ((char*)(input_buffer->buffer))[i]);
-    }*/
-
     Tree* akinator_tree = tree_create(BASE_NODE_COUNT);
     size_t pos = 0; 
 
     akinator_tree_read((char*)(input_buffer->buffer), akinator_tree, &pos);
-    free(input_buffer->buffer);
-    free(input_buffer);
+    
+    TextInfoDtor(input_buffer);
 
     size_t level = 0;
 
@@ -116,8 +38,7 @@ Node* object_guess(Tree* akinator_tree)
 {
     Node* curr_node = akinator_tree->node_list;
 
-    size_t level = 0;
-    tree_print(akinator_tree->node_list, akinator_tree->tree_log, &level);
+    TREE_PRINT(akinator_tree->node_list, akinator_tree->tree_log);
 
     while (curr_node->left != NULL)
     {
@@ -131,8 +52,6 @@ Node* object_guess(Tree* akinator_tree)
         {
             curr_node = curr_node->right;
         }
-
-        //printf("object_seached = %s\n", curr_node->val);
     }
 
     return curr_node;
@@ -142,7 +61,7 @@ size_t question(Node* curr_node)
 {
     printf("Это существо %s ?\nДа / Нет\n", curr_node->val);
 
-    char answer[50] = {};
+    char answer[50] = {};                       // overflow and const 
     int correct_answer = scanf("%s", answer);
 
     if (!correct_answer)
@@ -187,7 +106,7 @@ void object_processing(Node* curr_node, Tree* akinator_tree)
     printf("Я это запомнил...\n");
 }
 
-unsigned char* str_scanf(void)
+unsigned char* str_scanf(void)              //gets
 {
     unsigned char* new_object = (unsigned char*)calloc(STR_LEN, sizeof(unsigned char));
 
@@ -218,28 +137,10 @@ unsigned char* str_scanf(void)
 
 
 void object_add(Node* old_node, const char* new_object, const char* feature, Tree* akinator_tree)
-{           // akinator without tree
-    //printf("old_node = %s\n", old_node->val);
-
+{           
     tree_add_node(old_node, left, new_object, akinator_tree);
     tree_add_node(old_node, right, (const char*) old_node->val, akinator_tree);
     memcpy(old_node->val, feature, STR_LEN);
-
-    /*if (akinator_tree->node_count == akinator_tree->capacity)
-        tree_increase_capasity(akinator_tree);*/
-    //printf("tree capacity = %zu\n", akinator_tree->capacity);
-    //printf("tree_node_count = %zu\n", akinator_tree->node_count);
-    /*printf("old_node = %s\n", old_node->val);
-    printf("feature_node->left->val = %s\n", feature_node->left->val);
-    printf(" отличается от ");
-    printf("feature_node->right->val =%s\n", feature_node->right->val); 
-    printf(" тем, что ");
-    printf("feature_node->val = %s\n", feature_node->val);
-    printf("\n");
-
-    node_list_print(akinator_tree);*/
-
-    return;
 }
 
 int is_continue(Tree* akinator_tree)
@@ -305,7 +206,7 @@ Node* akinator_tree_read(char* source, Tree* akinator_tree, size_t* pos)
     //printf("the remained tree = \n%s\n", source + *(pos));
     //printf("the next symbol is %c(%d)\n", *(source + *(pos)), *(source + *(pos)));
     
-    if (*(source + *(pos)) == '{')
+    if (*(source + *(pos)) == '{')                  // reverse if 
     {
         //printf("processing symbol {\n");
         
@@ -410,44 +311,25 @@ unsigned char* arg_scanf(char* source, size_t* pos)
     //printf("source = %s\n", source + *pos);
     //printf("symbol = %c\n", (unsigned char) (*(source + *pos)));
 
-    if (*(source + (*pos)) == 34)
+    if(*(source + (*pos)) != '"') 
     {
-        (*pos)++;
-        while (*(source + *(pos)) != '"')
-        {
-            arg[i] = (unsigned char)*(source + *pos);
-            i++; (*pos)++;
-        }
-        (*pos)++;
-        skip_spaces(source, pos);
-
-        //printf("arg is %s\n", arg);
-
-        return arg;
+        free(arg);
+        return NULL;
     }
 
-    //printf("arg is NULL\n");
+    (*pos)++;
+    while (*(source + *(pos)) != '"')
+    {
+        arg[i] = (unsigned char)*(source + (*pos));
+        i++; 
+        (*pos)++;
+    }
+    (*pos)++;
+    skip_spaces(source, pos);
 
-    free(arg);
-    return nullptr;
-}
+    //printf("arg is %s\n", arg);
 
-void skip_spaces(char* source, size_t* pos)
-{
-    
-    while ((*(source + *pos) == ' ') || (*(source + *pos) == '\n') 
-        || (*(source + *pos) == '\t')|| (*(source + *pos) == EOF)){(*pos)++;}
-    
-    //printf("after skip spaces\n");
-    
-    return;
-}
-
-void ClearBuffer(void)
-{
-    char ch = 0;
-
-    while ((ch = (char)getchar()) != '\n' && ch != EOF) {}
+    return arg;
 }
 
 void akinator_end(Tree* akinator_tree)
@@ -461,84 +343,6 @@ void akinator_end(Tree* akinator_tree)
     tree_detor(akinator_tree);
 
     FCLOSE(output);
-}
-
-void fprint_nchar(FILE* dest, char symbol, size_t count)
-{
-    for (size_t i = 0; i < count; i++) {fprintf(dest, "%c", symbol);}
-}
-
-
-Node* tree_add_node(Node* parent, child subtree, const char* val, Tree* curr_tree)
-{
-    if (curr_tree->node_count == curr_tree->capacity)
-        tree_increase_capasity(curr_tree);
-
-    Node* new_node = &(curr_tree->node_list)[curr_tree->node_count++];
-
-    new_node->left  = NULL;
-    new_node->right = NULL;
-    new_node->previous = parent;
-    memcpy(new_node->val, val, STR_LEN);
-
-    switch (subtree)
-    {
-        case left:
-        {
-            parent->left = new_node;
-            break;
-        }
-        case right:
-        {
-            parent->right = new_node;
-            break;
-        }
-        default:
-        {
-            printf("Неправильный ребёнок\n");
-            return NULL;
-        }
-    }
-
-    return new_node;
-}
-
-int way_search(Node* curr_node, const char* val, Stack* way_to_obj)
-{
-    if (curr_node->left == NULL)
-    {
-        //printf("children is null\n");
-        //printf("compare between %s and %s\n", val, curr_node->val);
-
-        int diff = strcmp((const char*)(curr_node->val), val);
-
-        if (!diff) 
-        {
-            //printf("Object found in node %s\n", curr_node->val);
-            return OBJECT_FOUND;
-        }
-
-        //printf("Object is not found in node %s\ndiff is %d\n", curr_node->val, diff);
-        return OBJECT_N_FOUND;
-    }
-
-    int buffer = 0;
-
-    StackPush(way_to_obj, left);
-    //printf("Go to left\n");
-    
-    if (way_search(curr_node->left, val, way_to_obj) == OBJECT_FOUND)
-    {
-        return OBJECT_FOUND;
-    }
-    StackPop(way_to_obj, &buffer);
-
-    StackPush(way_to_obj, right);
-    //printf("Go to right\n");
-    if  (way_search(curr_node->right, val, way_to_obj) == OBJECT_FOUND) return OBJECT_FOUND;
-    StackPop(way_to_obj, &buffer);
-
-    return OBJECT_N_FOUND;
 }
 
 void object_search(Tree* tree)
@@ -638,18 +442,18 @@ void game_mod_playing(Tree* akinator_tree)
     {
         int option = menu();
 
-        switch (option)
+        switch (option)            
         {
-        case 1:
+        case Object_guess:
             akinator_playing(akinator_tree);
             break;
-        case 2:
+        case Object_search:
             object_search(akinator_tree);
             break;
-        case 3:
+        case Objects_compare:
             object_compare(akinator_tree);
             break;
-        case 4:
+        case Exit:
         default:
             continue_flag = 0;
             break;
@@ -712,15 +516,7 @@ void object_compare(Tree* akinator_tree)
         {
             size_t curr_pos = 0;
 
-            /*printf("way_to_obj1:\n");
-            StackPrint(way_to_obj1);
-
-            printf("way_to_obj2:\n");
-            StackPrint(way_to_obj2);*/
-
-            while (way_to_obj1->data[curr_pos] == way_to_obj2->data[curr_pos]){curr_pos++;} 
-
-            //printf("curr_pos = %zu\n", curr_pos);           
+            while (way_to_obj1->data[curr_pos] == way_to_obj2->data[curr_pos]){curr_pos++;}        
 
             printf("%s похож на %s тем, что ", val1, val2);
             difinition_print(akinator_tree, way_to_obj1, 0, curr_pos);
@@ -742,24 +538,6 @@ void object_compare(Tree* akinator_tree)
     }    
 
     return;
-}
-
-struct Stack* way_stack(Tree* tree, char* val)
-{
-    Stack* way_to_obj = (Stack*) calloc (1, sizeof(Stack));
-
-    StackCtor(way_to_obj, DEFAULT_CAPACITY);
-
-    if (way_search(tree->node_list, val, way_to_obj) == OBJECT_N_FOUND)
-    {
-        StackDtor(way_to_obj);
-        free(way_to_obj);
-        return NULL;
-    }
-    else
-    {
-        return way_to_obj;
-    }
 }
 
 

@@ -12,4 +12,6 @@ struct TextInfo* InputText(TextInfo*, FILE* file);
 
 void charprint(struct TextInfo text);
 
+void TextInfoDtor(TextInfo*);
+
 #endif //INPUT_TEXT_H

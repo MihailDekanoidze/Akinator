@@ -61,6 +61,14 @@ void charprint(struct TextInfo text)
     }
 }
 
+void TextInfoDtor(TextInfo* text)
+{
+    text->elemcount = 0;
+
+    free(text->buffer);
+    free(text);
+}
+
 
 
 
